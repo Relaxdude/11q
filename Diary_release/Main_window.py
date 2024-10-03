@@ -28,7 +28,7 @@ def main_window():
 
     def on_enter_for_Choice_left1(e):
         if int(info_data_Main_window[-1][4]) != -1:
-            Choice_left1.config(background=info_data_Main_window, foreground= info_data_Main_window)
+            Choice_left1.config(background= color_red, foreground= color_black)
     def on_leave_for_Choice_left1(e):
         if int(info_data_Main_window[-1][4]) != -1:
             Choice_left1.config(background= color_grey, foreground= color_red)
