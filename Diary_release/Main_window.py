@@ -235,6 +235,8 @@ def main_window():
     label_percent = Label(frame, text= get_percent(), font=("Arial", 50), foreground=get_color_precent())
     label_percent.grid(row=1, column=2, ipadx= 50)
 
+    Label(frame, text="").grid(row= 2, column= 1, padx= 165)
+
     def on_enter_for_Choice_left1(e):
         if int(info_data_Main_window[-1][4]) != -1:
             Choice_left1.config(background=color_red, foreground= color_black)
@@ -247,7 +249,7 @@ def main_window():
     Choice_left1.bind('<Leave>', on_leave_for_Choice_left1)
 
     label1 = Label(frame, text=Bad_or_Good(bad_1, good_1)[0], font=("Arial", 34), foreground=Bad_or_Good(bad_1, good_1)[1])
-    label1.grid(row=2, column=1, ipadx= 142)
+    label1.grid(row=2, column=1)
 
     def on_enter_for_Choice_right1(e):
         if int(info_data_Main_window[-1][4]) != 1 and int(info_data_Main_window[-1][4]) != -1:
@@ -274,7 +276,7 @@ def main_window():
     Choice_left2.bind('<Leave>', on_leave_for_Choice_left2)
 
     label2 = Label(frame, text=Bad_or_Good(bad_2, good_2)[0], font=("Arial", 34), foreground=Bad_or_Good(bad_2, good_2)[1])
-    label2.grid(row=3, column=1, ipadx= 100)
+    label2.grid(row=3, column=1)
 
     def on_enter_for_Choice_right2(e):
         if int(info_data_Main_window[-1][5]) != 1 and int(info_data_Main_window[-1][5]) != -1:
@@ -301,7 +303,7 @@ def main_window():
     Choice_left3.bind('<Leave>', on_leave_for_Choice_left3)
 
     label3 = Label(frame, text=Bad_or_Good(bad_3, good_3)[0], font=("Arial", 34), foreground=Bad_or_Good(bad_3, good_3)[1])
-    label3.grid(row=4, column=1, ipadx= 100)
+    label3.grid(row=4, column=1)
 
     def on_enter_for_Choice_right3(e):
         if int(info_data_Main_window[-1][6]) != 1 and int(info_data_Main_window[-1][6]) != -1:
@@ -328,7 +330,7 @@ def main_window():
     Choice_left4.bind('<Leave>', on_leave_for_Choice_left4)
 
     label4 = Label(frame, text=Bad_or_Good(bad_4, good_4)[0], font=("Arial", 34), foreground=Bad_or_Good(bad_4, good_4)[1])
-    label4.grid(row=5, column=1, ipadx= 100)
+    label4.grid(row=5, column=1)
 
     def on_enter_for_Choice_right4(e):
         if int(info_data_Main_window[-1][7]) != 1 and int(info_data_Main_window[-1][7]) != -1:
@@ -355,7 +357,7 @@ def main_window():
     Choice_left5.bind('<Leave>', on_leave_for_Choice_left5)
 
     label5 = Label(frame, text=Bad_or_Good(bad_5, good_5)[0], font=("Arial", 34), foreground=Bad_or_Good(bad_5, good_5)[1])
-    label5.grid(row=6, column=1, ipadx= 100)
+    label5.grid(row=6, column=1)
 
     def on_enter_for_Choice_right5(e):
         if int(info_data_Main_window[-1][8]) != 1 and int(info_data_Main_window[-1][8]) != -1:
