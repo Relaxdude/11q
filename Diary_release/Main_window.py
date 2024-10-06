@@ -84,7 +84,7 @@ def main_window():
                 Button_Cancel.config(background= color_light_gray, foreground= color_black)
             def on_leave_for_Button_Cancel(e):
                 Button_Cancel.config(background= color_grey, foreground= color_black)
-            Button_Cancel = Button(frame, text="Отмена", height= 3, width= 15, font=("Arial", 18), bg= color_grey, command= close)
+            Button_Cancel = Button(frame, text="Отменить", height= 3, width= 15, font=("Arial", 18), bg= color_grey, command= close)
             Button_Cancel.grid(row= 1, column= 1)
             Button_Cancel.bind('<Enter>', on_enter_for_Button_Cancel)
             Button_Cancel.bind('<Leave>', on_leave_for_Button_Cancel)
@@ -215,6 +215,7 @@ def main_window():
 
     window = Tk()
     window.title("Мой день")
+    window.attributes('-fullscreen',True)
     window.geometry(str(window.winfo_screenwidth() - 75) + "x" + str(window.winfo_screenheight()))
     window.columnconfigure(index=0, weight=2)
     window.rowconfigure(index=0, weight=2)
@@ -380,8 +381,8 @@ def main_window():
         cal_btn1.config(background= color_light_gray, foreground= color_violet)
     def on_leave_for_cal_btn1(e):
         cal_btn1.config(background= color_grey, foreground= color_black)
-    cal_btn1 = Button(frame, text='Ежедневник        (' + get_weekly_tasks_count() + ")", bg= color_grey, activebackground= color_violet, font=("Arial", 14), command=destroy_window)
-    cal_btn1.grid(row=7, column=0, columnspan= 2, ipadx= 112, ipady= 25, pady= 10)
+    cal_btn1 = Button(frame, text='                 Ежедневник                              (' + get_weekly_tasks_count() + ")", bg= color_grey, activebackground= color_violet, font=("Arial", 14), command=destroy_window)
+    cal_btn1.grid(row=7, column=0, columnspan= 2, ipadx= 15, ipady= 25, pady= 10)
     cal_btn1.bind('<Enter>', on_enter_for_cal_btn1)
     cal_btn1.bind('<Leave>', on_leave_for_cal_btn1)
 
