@@ -70,10 +70,14 @@ def main_window():
                 
                 window_sure_choice.grab_release() 
                 window_sure_choice.destroy()
+            
+            def func():
+                pass
 
             window_sure_choice = Toplevel()
             window_sure_choice.title('Подтвердите действие')
             window_sure_choice.geometry("477x335+724+357")
+            window_sure_choice.protocol('WM_DELETE_WINDOW', func)
             frame = Frame(window_sure_choice, highlightbackground= "#000000", highlightthickness= 10, height= 50)
             frame.pack(fill=BOTH, expand=1)
 
