@@ -319,6 +319,7 @@ def weekly_window():
 		window_add_everyday.geometry("1240x650+309+200")
 		frame = Frame(window_add_everyday, highlightbackground= color_black, highlightthickness= 10, height= 100)
 		frame.pack(fill=BOTH, expand=1)
+		Buttons_Everyday_isactive= [False, False, False, False, False, False, False]
 		arr_days_for_everyday = []
 
 		Label(frame, text="Введи название задачи", font="Arial 20 bold", height= 2).grid(row= 0, column= 1, columnspan= 4, padx= 10)
