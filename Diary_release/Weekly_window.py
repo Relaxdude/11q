@@ -25,13 +25,13 @@ prioritys = ["Неважный", "Низкий", "Средний", "Высоки
 Buttons_Everyday_isactive= [False, False, False, False, False, False, False]
 which_week = 1
 arr_days_for_everyday = []
+count_tasks_today = 0
 
 file = open('info_Weekly.txt', 'r', encoding='utf-8')
 info_data_Weekly_window = file.readlines()
 for i in range(len(info_data_Weekly_window) - 1):
 	info_data_Weekly_window[i] = info_data_Weekly_window[i][:-1]
 for i in range(len(info_data_Weekly_window)):
-	# for j in range(6):
 	info_data_Weekly_window[i] = info_data_Weekly_window[i].split(" ")
 	string = ""
 	for j in range(6,len(info_data_Weekly_window[i])):
@@ -93,7 +93,7 @@ def get_weekly_tasks_count():
 
 	count_tasks_today = 0
 	for i in range(len(info_data_Weekly_window)):
-		if int(info_data_Weekly_window[i][0]) == time.localtime()[7]:
+		if int(info_data_Weekly_window[i][0]) == time.localtime()[7] and int(info_data_Weekly_window[i][5]) != 1:
 			count_tasks_today += 1
 	return "Осталось выполнить заданий: " + str(count_tasks_today)
 
@@ -184,12 +184,12 @@ def set_enters(text):
 #  статус выполнено ли[5] (-2(дедлайн прошел), -1(день прошел), 0(ожидание), 1(выполнено), 2(ежедневка не выполнена), 3(ежедневка выполнена)), текст[6]
 def weekly_window():
 
-	def window_add_task():
+	def window_add_task(data = []):
 
 		global days_1
 		global prioritys
 
-		def get_message():
+		def get_message(data):
 
 			global day
 			global task
@@ -200,20 +200,31 @@ def weekly_window():
 			global prioritys
 
 			if combobox_day.get() != "" and combobox_deadline.get() != "" and combobox_priority.get() != "" and entry_task.get() != "":
-				now = time.localtime()
-				if days_1.index(combobox_day.get()) - now[6] + now[7] <= days_1.index(combobox_deadline.get()) - now[6] + now[7]:
-					info_data_Weekly_window.append([str(days_1.index(combobox_day.get()) - now[6] + now[7]), str(now[0]), str(what_day_week(days_1.index(combobox_day.get()))), str(days_1.index(combobox_deadline.get()) - now[6] + now[7]), str(prioritys.index(combobox_priority.get())), str(0), str(eliminating_spaces(entry_task.get()))])
-					write_data()
-					window_add.grab_release()
-					window_add.destroy()
-					main_window.destroy()
-				else:
-					mb.showerror("Ошибка", "Дедлайн не может быть раньше чем день задачи")
+					now = time.localtime()
+					if days_1.index(combobox_day.get()) - now[6] + now[7] <= days_1.index(combobox_deadline.get()) - now[6] + now[7]:
+						if len(data) == 0:
+							info_data_Weekly_window.append([str(days_1.index(combobox_day.get()) - now[6] + now[7]), str(now[0]), str(what_day_week(days_1.index(combobox_day.get()))), str(days_1.index(combobox_deadline.get()) - now[6] + now[7]), str(prioritys.index(combobox_priority.get())), str(0), str(eliminating_spaces(entry_task.get()))])
+							write_data()
+							window_add.grab_release()
+							window_add.destroy()
+							main_window.destroy()
+						else:
+							data[0] = str(days_1.index(combobox_day.get()) - now[6] + now[7])
+							data[2] = str(what_day_week(days_1.index(combobox_day.get())))
+							data[3] = str(days_1.index(combobox_deadline.get()) - now[6] + now[7])
+							data[4] = str(prioritys.index(combobox_priority.get()))
+							data[6] = str(eliminating_spaces(entry_task.get()))
+							write_data()
+							window_add.grab_release()
+							window_add.destroy()
+							main_window.destroy()
+					else:
+						mb.showerror("Ошибка", "Дедлайн не может быть раньше чем день задачи")
 			else:
 				mb.showerror("Ошибка", "Все поля должны быть заполнены")
 		
 		window_add = Toplevel()
-		window_add.title('Добавить задачу')
+		window_add.title('Данные задания')
 		window_add.geometry("1240x370+309+340")
 		frame = Frame(window_add, highlightbackground= color_black, highlightthickness= 10, height= 100)
 		frame.pack(fill=BOTH, expand=1)
@@ -252,21 +263,21 @@ def weekly_window():
 			Button_Save.config(background= color_light_gray, foreground= color_black)
 		def on_leave_for_Button_Save(e):
 			Button_Save.config(background= color_grey, foreground= color_black)
-		Button_Save = Button(frame, text= 'Добавить', font= "Arial 18 bold", bg= color_grey, height= 3, width= 30, command= get_message)	
+		Button_Save = Button(frame, text= 'Добавить', font= "Arial 18 bold", bg= color_grey, height= 3, width= 30, command= lambda: get_message(data))	
 		Button_Save.grid(row=4, column= 1, pady= 20, columnspan= 4)
 		Button_Save.bind('<Enter>', on_enter_for_Button_Save)
 		Button_Save.bind('<Leave>', on_leave_for_Button_Save)
 
 		window_add.grab_set()
 	
-	def window_add_task_everyday():
+	def window_add_task_everyday(data = []):
 
 		global days_1
 		global prioritys
 		global arr_days_for_everyday
 		global Buttons_Everyday_isactive
 
-		def get_message():
+		def get_message(data = []):
 			
 			global day
 			global task
@@ -279,13 +290,15 @@ def weekly_window():
 			global Buttons_Everyday_isactive
 			# У каждой ежедневной задачи должны быть: день[0], год[1], день недели[2], номер недели[3], приоритет[4],
 			#  статус выполнено ли[5] (-2(дедлайн прошел), -1(день прошел), 0(ожидание), 1(выполнено), 2(ежедневка не выполнена)), текст[6]
-
 			if len(arr_days_for_everyday) != 0 and combobox_priority.get() != "" and entry_task.get() != "":
+				if len(data) != 0:
+					for i in reversed(range(len(info_data_Weekly_window))):
+						if int(info_data_Weekly_window[i][1]) == 0 and int(info_data_Weekly_window[i][4]) == int(data[4]) and info_data_Weekly_window[i][6] == data[6]:
+							info_data_Weekly_window.pop(i)
 				for i in range(len(arr_days_for_everyday)):
-					info_data_Weekly_window.append([str(get_true_day([arr_days_for_everyday[i], 0])), str(0), str(arr_days_for_everyday[i]), str(0), str(prioritys.index(combobox_priority.get())), str(2), str(eliminating_spaces(entry_task.get()))])
-					info_data_Weekly_window.append([str(get_true_day([arr_days_for_everyday[i], 1])), str(0), str(arr_days_for_everyday[i]), str(1), str(prioritys.index(combobox_priority.get())), str(2), str(eliminating_spaces(entry_task.get()))])
-					for i in range(7):
-						Buttons_Everyday_isactive[i] = False
+						info_data_Weekly_window.append([str(get_true_day([arr_days_for_everyday[i], 0])), str(0), str(arr_days_for_everyday[i]), str(0), str(prioritys.index(combobox_priority.get())), str(2), str(eliminating_spaces(entry_task.get()))])
+						info_data_Weekly_window.append([str(get_true_day([arr_days_for_everyday[i], 1])), str(0), str(arr_days_for_everyday[i]), str(1), str(prioritys.index(combobox_priority.get())), str(2), str(eliminating_spaces(entry_task.get()))])
+
 				write_data()
 				window_add_everyday.grab_release()
 				window_add_everyday.destroy()
@@ -318,9 +331,9 @@ def weekly_window():
 		window_add_everyday.title('Добавить ежедневное задание')
 		window_add_everyday.geometry("1240x650+309+200")
 		frame = Frame(window_add_everyday, highlightbackground= color_black, highlightthickness= 10, height= 100)
-		frame.pack(fill=BOTH, expand=1)
+		frame.pack(fill=BOTH, expand=1)		
 		Buttons_Everyday_isactive= [False, False, False, False, False, False, False]
-		arr_days_for_everyday = []
+		arr_days_for_everyday = []									
 
 		Label(frame, text="Введи название задачи", font="Arial 20 bold", height= 2).grid(row= 0, column= 1, columnspan= 4, padx= 10)
 		Label(frame, text="").grid(row= 0, column= 0)
@@ -446,7 +459,7 @@ def weekly_window():
 			Button_Save.config(background= color_light_gray, foreground= color_black)
 		def on_leave_for_Button_Save(e):
 			Button_Save.config(background= color_grey, foreground= color_black)
-		Button_Save = Button(frame, text= 'Добавить', font= "Arial 18 bold", bg= color_grey, height= 3, width= 30, command= get_message)	
+		Button_Save = Button(frame, text= 'Добавить', font= "Arial 18 bold", bg= color_grey, height= 3, width= 30, command= lambda: get_message(data))	
 		Button_Save.grid(row=2, column= 3, pady= 20, rowspan= 8)
 		Button_Save.bind('<Enter>', on_enter_for_Button_Save)
 		Button_Save.bind('<Leave>', on_leave_for_Button_Save)
@@ -455,6 +468,21 @@ def weekly_window():
 
 	def delete_or_complete_task(data):
 
+		def update(data):
+
+			global info_data_Weekly_window
+
+			window_compl_del.grab_release() 
+			window_compl_del.destroy()
+			if int(data[1]) == 0:			
+				window_add_task_everyday(data)
+			else:
+				window_add_task(data)
+
+			# if int(data[1]) == 0:
+			# 	for i in range(len(info_data_Weekly_window)):
+			# 		if int(info_data_Weekly_window[i][1]) == 0 and int(info_data_Weekly_window[i][4]) == int(data[4]) and info_data_Weekly_window[i][6] == data[6]:
+			# 			info_data_Weekly_window[i][6] = 
 		def complete(data_complete):
 			
 			if int(data_complete[1]) == 0 and int(data_complete[0]) != time.localtime()[7]:
@@ -491,30 +519,39 @@ def weekly_window():
 
 		window_compl_del = Toplevel()
 		window_compl_del.title('Подтвердите действие')
-		window_compl_del.geometry("477x335+724+357")
+		window_compl_del.geometry("478x445+724+357")
 		frame = Frame(window_compl_del, highlightbackground= "#000000", highlightthickness= 10, height= 50)
 		frame.pack(fill=BOTH, expand=1)
 
-		Label(frame, text="Удалить задачу\n или отметить что оно выполнено ?", font="Arial 18 bold", height= 7).grid(row= 0, column= 0, columnspan= 4)
+		Label(frame, text="Удалить задачу, изменить,\n или отметить что оно выполнено ?", font="Arial 18 bold", height= 7).grid(row= 0, column= 0, columnspan= 4)
 		Label(frame, text="").grid(row= 1, column= 0)
+
+		def on_enter_for_Button_Update(e):
+			Button_Update.config(background= color_light_gray, foreground= color_black)
+		def on_leave_for_Button_Update(e):
+			Button_Update.config(background= color_grey, foreground= color_black)
+		Button_Update = Button(frame, text="Изменить", height= 3, width= 31, font=("Arial", 18), bg= color_grey, command= partial(update, data))
+		Button_Update.grid(row= 1, column= 1, columnspan= 3)
+		Button_Update.bind('<Enter>', on_enter_for_Button_Update)
+		Button_Update.bind('<Leave>', on_leave_for_Button_Update)
 
 		def on_enter_for_Button_Complete(e):
 			Button_Complete.config(background= color_green, foreground= color_black)
 		def on_leave_for_Button_Complete(e):
 			Button_Complete.config(background= color_grey, foreground= color_black)
 		Button_Complete = Button(frame, text="Выполнено", height= 3, width= 15, font=("Arial", 18), bg= color_grey, command= partial(complete, data))
-		Button_Complete.grid(row= 1, column= 1)
+		Button_Complete.grid(row= 2, column= 1, pady= 5)
 		Button_Complete.bind('<Enter>', on_enter_for_Button_Complete)
 		Button_Complete.bind('<Leave>', on_leave_for_Button_Complete)
 
-		Label(frame, text="").grid(row= 1, column= 2)
+		Label(frame, text="").grid(row= 2, column= 2)
 
 		def on_enter_for_Button_Delete(e):
 			Button_Delete.config(background= color_red, foreground= color_black)
 		def on_leave_for_Button_Delete(e):
 			Button_Delete.config(background= color_grey, foreground= color_black)
 		Button_Delete = Button(frame, text="Удалить", height= 3, width= 15, font=("Arial", 18), bg= color_grey, command= partial(delete, data))
-		Button_Delete.grid(row= 1, column= 3)
+		Button_Delete.grid(row= 2, column= 3)
 		Button_Delete.bind('<Enter>', on_enter_for_Button_Delete)
 		Button_Delete.bind('<Leave>', on_leave_for_Button_Delete)
 
@@ -550,7 +587,28 @@ def weekly_window():
 	Label(frame_up, text="Воскресенье", font=("Arial", 16), bg= color_grey).place(x=1627, y=10, height=40, width= 235)
 
 	n_row_monday, n_row_tuesday, n_row_wednesday, n_row_thursday, n_row_friday, n_row_saturday, n_row_sunday = 0, 0, 0, 0, 0, 0, 0
-			
+				
+	now = time.localtime()
+
+	arr_for_delete = []
+	# Находим инфу, прошлой недели (ненужной)
+	for i in range(len(info_data_Weekly_window)):
+		# Находим что неделя прошлая от актуальной, то есть ненужная. Нужны актуальная и следующая
+		if (int(info_data_Weekly_window[i][2]) > now[6] and int(info_data_Weekly_window[i][0]) < now[7]) or (int(info_data_Weekly_window[i][2]) <= now[6] and int(info_data_Weekly_window[i][0]) < now[7] and now[7] - int(info_data_Weekly_window[i][0]) > 6):
+			if int(info_data_Weekly_window[i][1]) == 0:
+				info_data_Weekly_window[i][0] = str(int(info_data_Weekly_window[i][0]) + 7)
+				info_data_Weekly_window[i][5] = str(2)
+				for j in range(len(info_data_Weekly_window)):
+					if int(info_data_Weekly_window[i][1]) == 0 and info_data_Weekly_window[i][0] == info_data_Weekly_window[j][0] and info_data_Weekly_window[i][6] == info_data_Weekly_window[j][6] and info_data_Weekly_window[j][3] == "1":
+						info_data_Weekly_window[j][0] = str(int(info_data_Weekly_window[j][0]) + 7)
+			elif (int(info_data_Weekly_window[i][5]) == 0 or int(info_data_Weekly_window[i][5]) == -1) and now[7] <= int(info_data_Weekly_window[i][3]):
+				info_data_Weekly_window.append([now[7],  now[0], now[6], info_data_Weekly_window[i][3], info_data_Weekly_window[i][4], 0, info_data_Weekly_window[i][6]])
+				arr_for_delete.append(info_data_Weekly_window[i])
+			elif (int(info_data_Weekly_window[i][5]) == -2 and now[7] > int(info_data_Weekly_window[i][3])) or int(info_data_Weekly_window[i][5]) == 1:
+				arr_for_delete.append(info_data_Weekly_window[i])
+	for i in arr_for_delete:
+		info_data_Weekly_window.remove(i)
+	
 	now = time.localtime()
 
 	for i in range(len(info_data_Weekly_window)):
@@ -563,27 +621,6 @@ def weekly_window():
 			else:
 				info_data_Weekly_window.append([now[7],  now[0], now[6], info_data_Weekly_window[i][3], info_data_Weekly_window[i][4], 0, info_data_Weekly_window[i][6]])
 				info_data_Weekly_window[i][5] = -1
-	
-	now = time.localtime()
-
-	arr_for_delete = []
-	# Находим инфу, прошлой недели (ненужной)
-	for i in range(len(info_data_Weekly_window)):
-		# Находим что неделя прошлая от актуальной, то есть ненужная. Нужны актуальная и следующая
-		if int(info_data_Weekly_window[i][2]) > now[6] and int(info_data_Weekly_window[i][0]) < now[7] or int(info_data_Weekly_window[i][2]) <= now[6] and int(info_data_Weekly_window[i][0]) < now[7] and now[7] - int(info_data_Weekly_window[i][0]) > 6:
-			if int(info_data_Weekly_window[i][1]) == 0:
-				info_data_Weekly_window[i][0] = str(int(info_data_Weekly_window[i][0]) + 7)
-				info_data_Weekly_window[i][5] = str(2)
-				for j in range(len(info_data_Weekly_window)):
-					if int(info_data_Weekly_window[i][1]) == 0 and info_data_Weekly_window[i][0] == info_data_Weekly_window[j][0] and info_data_Weekly_window[i][6] == info_data_Weekly_window[j][6] and info_data_Weekly_window[j][3] == "1":
-						info_data_Weekly_window[j][0] = str(int(info_data_Weekly_window[j][0]) + 7)
-			elif (int(info_data_Weekly_window[i][5]) == 0 or int(info_data_Weekly_window[i][5]) == -1) and now[7] <= int(info_data_Weekly_window[i][3]):
-				info_data_Weekly_window.append([now[7],  now[0], now[6], info_data_Weekly_window[i][3], info_data_Weekly_window[i][4], 0, info_data_Weekly_window[i][6]])
-				info_data_Weekly_window.pop(i)
-			elif int(info_data_Weekly_window[i][5]) == -2 and now[7] > int(info_data_Weekly_window[i][3]):
-				arr_for_delete.append(info_data_Weekly_window[i])
-	for i in arr_for_delete:
-		info_data_Weekly_window.remove(i)
 	
 	# Сортируем строки задач по приоритету
 	arr_data_complete = []
