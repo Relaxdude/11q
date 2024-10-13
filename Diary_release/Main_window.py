@@ -2,6 +2,7 @@ from tkinter import *
 import time
 import Settings
 from Weekly_window import get_weekly_tasks_count
+from functools import partial
 
 bad_1, good_1, bad_2, good_2, bad_3, good_3, bad_4, good_4, bad_5, good_5 = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 info_data_Main_window = []
@@ -54,6 +55,156 @@ def main_window():
 
     if len(info_data_Main_window) == 0 or int(info_data_Main_window[i][3]) < now[7] or int(info_data_Main_window[i][2]) < now[0]:
         info_data_Main_window.append([str(now[2]), str(now[1]), str(now[0]), str(now[7]), "-2", "-2", "-2", "-2", "-2"])
+
+    def write_data():
+        
+        file = open('info_Main.txt', 'w')
+        for i in range(len(info_data_Main_window)):
+            x = " ".join(str(el) for el in info_data_Main_window[i])
+            if i == len(info_data_Main_window) - 1:
+                file.write(x)
+            else:
+                file.write(x + '\n')
+        file.close()
+    
+    def update_last_day():
+        
+        now = time.localtime()
+        def update(data):
+            if now[7] == int(info_data_Main_window[-1][3]):
+                if now[7] - int(info_data_Main_window[-2][3]) == 1:
+                    info_data_Main_window[-2] = data
+                else:
+                    info_data_Main_window.append(info_data_Main_window[-1])
+                    info_data_Main_window[-2] = data
+            else:
+                if now[7] - int(info_data_Main_window[-1][3]) == 1:
+                    info_data_Main_window[-1] = data
+                else:
+                    info_data_Main_window.append(data)
+            write_data()
+            window_update.grab_release()
+            window_update.destroy()
+            window.destroy()
+
+        def update_data(data, status_button, num_col):
+            
+            if status_button == "bad":
+                data[num_col] = "-1"
+            elif int(data[num_col]) != -1:
+                data[num_col] = "1"
+        
+        def close():
+                
+                window_update.grab_release() 
+                window_update.destroy()
+        
+        def func():
+                pass
+
+        now = time.localtime()
+        if now[7] == int(info_data_Main_window[-1][3]):
+            if now[7] - int(info_data_Main_window[-2][3]) == 1:
+                data_last_day = info_data_Main_window[-2].copy()
+            else:
+                data_last_day = [str(int(info_data_Main_window[-1][0]) - 1), info_data_Main_window[-1][1], info_data_Main_window[-1][2], str(int(info_data_Main_window[-1][3]) - 1), "-2", "-2", "-2", "-2", "-2"]
+        else:
+            if now[7] - int(info_data_Main_window[-1][3]) == 1:
+                data_last_day = info_data_Main_window[-1].copy()
+            else:
+                data_last_day = [str(now[2]), str(now[1]), str(now[0]), str(now[7] - 1), "-2", "-2", "-2", "-2", "-2"]
+        
+        Buttons_Choice = []
+
+        window_update = Toplevel()
+        window_update.title("Обновление данных")
+        window_update.protocol('WM_DELETE_WINDOW', func)
+        window_update.geometry("612x515+623+283")
+        frame = Frame(window_update, highlightbackground= color_black, highlightthickness= 10)  
+        frame.pack(fill=BOTH, expand=1)
+
+        Label(frame, text= "Калибровка данных", font="Arial 20 bold").grid(row= 0, column= 0, columnspan= 2)
+
+        def on_enter(id_row_day, id_button, bad_or_good, e):
+            if bad_or_good == 0:
+                if int(data_last_day[id_row_day]) != -1:
+                    Buttons_Choice[id_button].config(background=color_red, foreground= color_black)
+            else:
+                if int(data_last_day[id_row_day]) != 1 and int(data_last_day[id_row_day]) != -1:
+                    Buttons_Choice[id_button].config(background=color_green, foreground= color_black)
+                elif int(data_last_day[id_row_day]) == -1: 
+                    Buttons_Choice[id_button].config(background= color_grey, foreground= color_red)
+        def on_leave(id_row_day, id_button, bad_or_good, e):
+            if bad_or_good == 0:
+                if int(data_last_day[id_row_day]) != -1:
+                    Buttons_Choice[id_button].config(background= color_grey, foreground= color_red)
+            else:
+                if int(data_last_day[id_row_day]) != 1:
+                    Buttons_Choice[id_button].config(background= color_grey, foreground= color_green)
+
+        Choice_left1 = Button(frame, width= 16, height= 1, text='Алкоголь', fg=get_color_button([-1, -2, -2, -2, -2], data_last_day)[1], bg=get_color_button([-1, -2, -2, -2, -2], data_last_day)[0], font=("Arial", 14), activebackground='red', command= lambda: update_data(data_last_day, "bad", 4))
+        Buttons_Choice.append(Choice_left1)
+
+        Choice_right1 = Button(frame, width= 16, height= 1, text='Тренировка', fg=get_color_button([1, -2, -2, -2, -2], data_last_day)[1], bg=get_color_button([1, -2, -2, -2, -2], data_last_day)[0], font=("Arial", 14), activebackground='green', command= lambda: update_data(data_last_day, "good", 4))
+        Buttons_Choice.append(Choice_right1)
+
+        Choice_left2 = Button(frame, width= 16, height= 1, text='Никотин', fg=get_color_button([-2, -1, -2, -2, -2], data_last_day)[1], bg=get_color_button([-2, -1, -2, -2, -2], data_last_day)[0], font=("Arial", 14), activebackground='red', command= lambda: update_data(data_last_day, "bad", 5))
+        Buttons_Choice.append(Choice_left2)
+
+        Choice_right2 = Button(frame, width= 16, height= 1, text='Активность', fg=get_color_button([-2, 1, -2, -2, -2], data_last_day)[1], bg=get_color_button([-2, 1, -2, -2, -2], data_last_day)[0], font=("Arial", 14), activebackground='green', command= lambda: update_data(data_last_day, "good", 5))
+        Buttons_Choice.append(Choice_right2)
+
+        Choice_left3 = Button(frame, width= 16, height= 1, text='Игры', font=("Arial", 14), fg=get_color_button([-2, -2, -1, -2, -2], data_last_day)[1], bg=get_color_button([-2, -2, -1, -2, -2], data_last_day)[0], activebackground='red', command= lambda: update_data(data_last_day, "bad", 6))
+        Buttons_Choice.append(Choice_left3)
+
+        Choice_right3 = Button(frame, width= 16, height= 1, text='Учёба',font=("Arial", 14), fg=get_color_button([-2, -2, 1, -2, -2], data_last_day)[1], bg=get_color_button([-2, -2, 1, -2, -2], data_last_day)[0], activebackground='green', command= lambda: update_data(data_last_day, "good", 6))
+        Buttons_Choice.append(Choice_right3)
+        
+        Choice_left4 = Button(frame, width= 16, height= 1, text='Потребительский контент', font=("Arial", 14), fg=get_color_button([-2, -2, -2, -1, -2], data_last_day)[1], bg=get_color_button([-2, -2, -2, -1, -2], data_last_day)[0], activebackground='red', command= lambda: update_data(data_last_day, "bad", 7))
+        Buttons_Choice.append(Choice_left4)
+        
+        Choice_right4 = Button(frame, width= 16, height= 1, text='Познавательный контент',font=("Arial", 14), fg=get_color_button([-2, -2, -2, 1, -2], data_last_day)[1], bg=get_color_button([-2, -2, -2, 1, -2], data_last_day)[0], activebackground='green', command= lambda: update_data(data_last_day, "good", 7))
+        Buttons_Choice.append(Choice_right4)
+        
+        Choice_left5 = Button(frame, width= 16, height= 1, text='Неправильное питание', font=("Arial", 14), fg=get_color_button([-2, -2, -2, -2, -1], data_last_day)[1], bg=get_color_button([-2, -2, -2, -2, -1], data_last_day)[0], activebackground='red', command= lambda: update_data(data_last_day, "bad", 8))
+        Buttons_Choice.append(Choice_left5)
+        
+        Choice_right5 = Button(frame, width= 16, height= 1, text='Правильное питание', font=("Arial", 14), fg=get_color_button([-2, -2, -2, -2, 1], data_last_day)[1], bg=get_color_button([-2, -2, -2, -2, 1], data_last_day)[0], activebackground='green', command= lambda: update_data(data_last_day, "good", 8))
+        Buttons_Choice.append(Choice_right5)
+
+        num_row, count = 1, -1
+        for i in range(len(Buttons_Choice)):          
+            if count < 1:
+                count += 1
+            else:
+                count = 0
+                num_row += 1
+            Buttons_Choice[i].grid(row= num_row + 1, column= count, ipadx= 50, ipady= 10, padx= 5, pady= 5)
+            Buttons_Choice[i].bind('<Enter>', partial(on_enter, num_row + 3, i, count))
+            Buttons_Choice[i].bind('<Leave>', partial(on_leave, num_row + 3, i, count))
+
+        def on_enter_for_Button_cancel(e):
+            Button_cancel.config(background= color_light_gray, foreground= color_black)
+        def on_leave_for_Button_cancel(e):
+            Button_cancel.config(background= color_grey, foreground= color_black)
+        Button_cancel = Button(frame, width= 16, height= 2, text='Отменить', font=("Arial", 14), fg= color_black, bg= color_grey, activebackground= color_grey, command= close)
+        Button_cancel.grid(row=7, column=0, ipadx= 50, ipady= 10, padx= 5, pady= 5)
+        Button_cancel.bind('<Enter>', on_enter_for_Button_cancel)
+        Button_cancel.bind('<Leave>', on_leave_for_Button_cancel)
+
+        def on_enter_for_Button_confirm(e):
+            Button_confirm.config(background= color_light_gray, foreground= color_black)
+        def on_leave_for_Button_confirm(e):
+            Button_confirm.config(background= color_grey, foreground= color_black)
+        Button_confirm = Button(frame, width= 16, height= 2, text='Подтвердить', font=("Arial", 14), fg= color_black, bg= color_grey, activebackground= color_grey, command= lambda: update(data_last_day))
+        Button_confirm.grid(row=7, column=1, ipadx= 50, ipady= 10, padx= 5, pady= 5)
+        Button_confirm.bind('<Enter>', on_enter_for_Button_confirm)
+        Button_confirm.bind('<Leave>', on_leave_for_Button_confirm)
+
+        Label(frame, text="", width= 40, height= 0).grid(row= 1, column= 0)
+        Label(frame, text="", width= 40, height= 0).grid(row= 1, column= 1)
+
+        window_update.grab_set()
 
     def sure_choice(params, color_meaning):
         
@@ -159,15 +310,8 @@ def main_window():
             if int(info_data_Main_window[k][7]) == 1: good_4 += 1
             if int(info_data_Main_window[k][8]) == -1: bad_5 += 1
             if int(info_data_Main_window[k][8]) == 1: good_5 += 1
-
-        file = open('info_Main.txt', 'w')
-        for i in range(len(info_data_Main_window)):
-            x = " ".join(str(el) for el in info_data_Main_window[i])
-            if i == len(info_data_Main_window) - 1:
-                file.write(x)
-            else:
-                file.write(x + '\n')
-        file.close()
+        
+        write_data()
 
     def Bad_or_Good(bad, good):
         if good > bad and good > (good + bad) * 0.9: return [">>>>>", color_green]
@@ -207,13 +351,13 @@ def main_window():
         elif float(get_percent()[:-1]) >= 40: return color_yellow
         else: return color_red
 
-    def get_color_button(param= [-2, -2, -2, -2, -2]):
+    def get_color_button(param= [-2, -2, -2, -2, -2], data = info_data_Main_window[-1]):
         a = 0
         for i in range(len(param)):
             if param[i] != -2:
                 a = i
-        if int(info_data_Main_window[-1][4 + a]) == -1 and param[a] == -1: return [color_red, color_black]
-        elif int(info_data_Main_window[-1][4 + a]) == 1 and param[a] == 1: return [color_green, color_black]
+        if int(data[4 + a]) == -1 and param[a] == -1: return [color_red, color_black]
+        elif int(data[4 + a]) == 1 and param[a] == 1: return [color_green, color_black]
         elif param[a] == -1: return [color_grey, color_red]
         else: return [color_grey, color_green]
 
@@ -385,10 +529,19 @@ def main_window():
         cal_btn1.config(background= color_light_gray, foreground= color_violet)
     def on_leave_for_cal_btn1(e):
         cal_btn1.config(background= color_grey, foreground= color_black)
-    cal_btn1 = Button(frame, text='                 Ежедневник                              (' + get_weekly_tasks_count() + ")", bg= color_grey, activebackground= color_violet, font=("Arial", 14), command=destroy_window)
-    cal_btn1.grid(row=7, column=0, columnspan= 2, ipadx= 15, ipady= 25, pady= 10)
+    cal_btn1 = Button(frame, text='Ежедневник\n(' + get_weekly_tasks_count() + ")", bg= color_grey, activebackground= color_violet, font=("Arial", 14), command=destroy_window)
+    cal_btn1.grid(row=7, column=0, ipadx= 12, ipady= 14, pady= 10)
     cal_btn1.bind('<Enter>', on_enter_for_cal_btn1)
     cal_btn1.bind('<Leave>', on_leave_for_cal_btn1)
+
+    def on_enter_for_cal_btn2(e):
+        cal_btn2.config(background= color_light_gray, foreground= color_black)
+    def on_leave_for_cal_btn2(e):
+        cal_btn2.config(background= color_grey, foreground= color_black)
+    cal_btn2 = Button(frame, text= "Изменить данные прошлого дня", bg= color_grey, activebackground= color_grey, font=("Arial", 14), command= update_last_day)
+    cal_btn2.grid(row=7, column=1, ipadx= 15, ipady= 25, pady= 10)
+    cal_btn2.bind('<Enter>', on_enter_for_cal_btn2)
+    cal_btn2.bind('<Leave>', on_leave_for_cal_btn2)
 
     def on_enter_for_cal_btn3(e):
         cal_btn3.config(background= color_light_gray, foreground= color_black)
