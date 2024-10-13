@@ -479,10 +479,6 @@ def weekly_window():
 			else:
 				window_add_task(data)
 
-			# if int(data[1]) == 0:
-			# 	for i in range(len(info_data_Weekly_window)):
-			# 		if int(info_data_Weekly_window[i][1]) == 0 and int(info_data_Weekly_window[i][4]) == int(data[4]) and info_data_Weekly_window[i][6] == data[6]:
-			# 			info_data_Weekly_window[i][6] = 
 		def complete(data_complete):
 			
 			if int(data_complete[1]) == 0 and int(data_complete[0]) != time.localtime()[7]:
@@ -495,8 +491,7 @@ def weekly_window():
 				window_compl_del.grab_release() 
 				window_compl_del.destroy()
 				main_window.destroy()
-			
-		
+					
 		def delete(data_delete):
 
 			global info_data_Weekly_window
@@ -515,7 +510,6 @@ def weekly_window():
 			window_compl_del.grab_release() 
 			window_compl_del.destroy()
 			main_window.destroy()
-
 
 		window_compl_del = Toplevel()
 		window_compl_del.title('Подтвердите действие')
@@ -591,6 +585,7 @@ def weekly_window():
 	now = time.localtime()
 
 	arr_for_delete = []
+	arr_for_double = []
 	# Находим инфу, прошлой недели (ненужной)
 	for i in range(len(info_data_Weekly_window)):
 		# Находим что неделя прошлая от актуальной, то есть ненужная. Нужны актуальная и следующая
@@ -602,15 +597,22 @@ def weekly_window():
 					if int(info_data_Weekly_window[i][1]) == 0 and info_data_Weekly_window[i][0] == info_data_Weekly_window[j][0] and info_data_Weekly_window[i][6] == info_data_Weekly_window[j][6] and info_data_Weekly_window[j][3] == "1":
 						info_data_Weekly_window[j][0] = str(int(info_data_Weekly_window[j][0]) + 7)
 			elif (int(info_data_Weekly_window[i][5]) == 0 or int(info_data_Weekly_window[i][5]) == -1) and now[7] <= int(info_data_Weekly_window[i][3]):
-				info_data_Weekly_window.append([now[7],  now[0], now[6], info_data_Weekly_window[i][3], info_data_Weekly_window[i][4], 0, info_data_Weekly_window[i][6]])
-				arr_for_delete.append(info_data_Weekly_window[i])
-			elif (int(info_data_Weekly_window[i][5]) == -2 and now[7] > int(info_data_Weekly_window[i][3])) or int(info_data_Weekly_window[i][5]) == 1:
+				flag = False
+				for j in arr_for_double:
+					if info_data_Weekly_window[i][3] == j[3] and info_data_Weekly_window[i][4] == j[4] and info_data_Weekly_window[i][6] == j[6]:
+						flag = True
+				if flag:
+					arr_for_delete.append(info_data_Weekly_window[i])
+				else:
+					arr_for_double.append(info_data_Weekly_window[i])
+					arr_for_delete.append(info_data_Weekly_window[i])
+					info_data_Weekly_window.append([now[7],  now[0], now[6], info_data_Weekly_window[i][3], info_data_Weekly_window[i][4], 0, info_data_Weekly_window[i][6]])
+			elif (int(info_data_Weekly_window[i][5]) == -2 and now[7] > int(info_data_Weekly_window[i][3])) or (int(info_data_Weekly_window[i][5]) == 1) or (now[6] == 0 and now[7] > int(info_data_Weekly_window[i][3]) and int(info_data_Weekly_window[i][5]) == -1):
 				arr_for_delete.append(info_data_Weekly_window[i])
 	for i in arr_for_delete:
 		info_data_Weekly_window.remove(i)
 	
 	now = time.localtime()
-
 	for i in range(len(info_data_Weekly_window)):
 		# Если день прошел и задание не было выполнено
 		if (int(info_data_Weekly_window[i][0]) < now[7] and int(info_data_Weekly_window[i][1]) == now[0] or int(info_data_Weekly_window[i][1]) < now[0]) and int(info_data_Weekly_window[i][5]) == 0:
