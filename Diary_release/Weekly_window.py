@@ -649,7 +649,6 @@ def weekly_window():
 	for i in arr_for_delete:
 		info_data_Weekly_window.remove(i)
 	
-	now = time.localtime()
 	for i in range(len(info_data_Weekly_window)):
 		# Если день прошел и задание не было выполнено
 		if (int(info_data_Weekly_window[i][0]) < now[7] and int(info_data_Weekly_window[i][1]) == now[0] or int(info_data_Weekly_window[i][1]) < now[0]) and int(info_data_Weekly_window[i][5]) == 0:
@@ -660,6 +659,20 @@ def weekly_window():
 			else:
 				info_data_Weekly_window.append([now[7],  now[0], now[6], info_data_Weekly_window[i][3], info_data_Weekly_window[i][4], 0, info_data_Weekly_window[i][6]])
 				info_data_Weekly_window[i][5] = -1
+	
+	#Удаляем задания которые были выполнены в прошлый день
+	arr_for_update_last_days, arr_for_delete = [], []
+	for i in range(len(info_data_Weekly_window)):
+		if i == 24:
+			pass
+		if int(info_data_Weekly_window[i][5]) == 1 and int(info_data_Weekly_window[i][1]) != 0:
+			arr_for_update_last_days.append(info_data_Weekly_window[i])
+	for i in range(len(info_data_Weekly_window)):
+		for j in arr_for_update_last_days:
+			if info_data_Weekly_window[i][3] == j[3] and info_data_Weekly_window[i][4] == j[4] and int(info_data_Weekly_window[i][5]) == 0 and info_data_Weekly_window[i][6] == j[6]:
+				arr_for_delete.append(info_data_Weekly_window[i])
+	for i in arr_for_delete:
+		info_data_Weekly_window.remove(i)
 	
 	# Сортируем строки задач по приоритету
 	arr_data_complete = []
@@ -862,4 +875,5 @@ def weekly_window():
 	my_canvas.bind('<Configure>', lambda e: my_canvas.configure(scrollregion = my_canvas.bbox("all")))
 	my_canvas.bind_all("<MouseWheel>", _on_mousewheel)
 
+	Label(main_window, text= "beta\n1.13", background= color_background, font=("Arial", 10)).place(x= 1870, y= 5)
 	main_window.mainloop()
