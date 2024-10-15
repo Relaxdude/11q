@@ -26,6 +26,7 @@ Buttons_Everyday_isactive= [False, False, False, False, False, False, False]
 which_week = 1
 arr_days_for_everyday = []
 count_tasks_today = 0
+flag_for_last_day = False
 
 file = open('info_Weekly.txt', 'r', encoding='utf-8')
 info_data_Weekly_window = file.readlines()
@@ -125,12 +126,36 @@ def get_deadline(day_info):
 		return ""
 	else:
 		return "\n\nДней осталось: " + str(int(day_info[3]) - time.localtime()[7])
+	
+def update_last_day(window):
+	
+	global flag_for_last_day
+
+	if Settings.flag_for_windows == 3:
+		pass
+	else:
+		Settings.where_flag_for_windows = 0
+		if flag_for_last_day:
+			flag_for_last_day = False
+			window.destroy()
+		else:
+			flag_for_last_day = True
+			window.destroy()
 
 def state_or_normal(status_task):
-	if int(status_task[5]) == -2 or int(status_task[5]) == -1 or int(status_task[5]) == 1 or (int(status_task[5]) == 2 and time.localtime()[7] > int(status_task[0])):
-		return 'disabled'
+
+	global flag_for_last_day
+
+	if flag_for_last_day:
+		if int(status_task[5]) == -1 or int(status_task[5]) == 2 and (time.localtime()[6] != 0 and Settings.flag_for_windows == 2 and time.localtime()[7] - int(status_task[0]) == 1):
+			return 'normal'
+		else:
+			return 'disabled'
 	else:
-		return 'normal'
+		if int(status_task[5]) == -2 or int(status_task[5]) == -1 or int(status_task[5]) == 1 or (int(status_task[5]) == 2 and time.localtime()[7] > int(status_task[0])):
+			return 'disabled'
+		else:
+			return 'normal'
 
 def get_max_tasks_on_day():
 
@@ -183,6 +208,8 @@ def set_enters(text):
 # У каждой задачи должны быть: день[0], год[1], день недели[2], дедлайн[3], приоритет[4],
 #  статус выполнено ли[5] (-2(дедлайн прошел), -1(день прошел), 0(ожидание), 1(выполнено), 2(ежедневка не выполнена), 3(ежедневка выполнена)), текст[6]
 def weekly_window():
+
+	Settings.where_flag_for_windows = 1
 
 	def window_add_task(data = []):
 
@@ -472,16 +499,21 @@ def weekly_window():
 
 			global info_data_Weekly_window
 
-			window_compl_del.grab_release() 
-			window_compl_del.destroy()
-			if int(data[1]) == 0:			
-				window_add_task_everyday(data)
+			if flag_for_last_day:
+				mb.showerror("Ошибка", "Нельзя изменить задание прошлого дня")
+				window_compl_del.grab_release() 
+				window_compl_del.destroy()
 			else:
-				window_add_task(data)
+				window_compl_del.grab_release() 
+				window_compl_del.destroy()
+				if int(data[1]) == 0:			
+					window_add_task_everyday(data)
+				else:
+					window_add_task(data)
 
 		def complete(data_complete):
 			
-			if int(data_complete[1]) == 0 and int(data_complete[0]) != time.localtime()[7]:
+			if int(data_complete[1]) == 0 and int(data_complete[0]) != time.localtime()[7] and flag_for_last_day == False:
 				mb.showerror("Ошибка", "Ежедневное задание должно выполнятся в свой же день")
 				window_compl_del.grab_release() 
 				window_compl_del.destroy()
@@ -495,21 +527,26 @@ def weekly_window():
 		def delete(data_delete):
 
 			global info_data_Weekly_window
-			
-			if int(data_delete[1]) == 0:
-				arr_index_for_delete_everyday = []
-				for i in range(len(info_data_Weekly_window)):
-					if int(info_data_Weekly_window[i][1]) == 0:
-						if info_data_Weekly_window[i][6] == data_delete[6]:
-							arr_index_for_delete_everyday.append(info_data_Weekly_window[i])
-				for i in arr_index_for_delete_everyday:
-					info_data_Weekly_window.remove(i)
+
+			if flag_for_last_day:
+				mb.showerror("Ошибка", "Нельзя удалить задание прошлого дня")
+				window_compl_del.grab_release() 
+				window_compl_del.destroy()
 			else:
-				info_data_Weekly_window.remove(data_delete)
-			write_data()
-			window_compl_del.grab_release() 
-			window_compl_del.destroy()
-			main_window.destroy()
+				if int(data_delete[1]) == 0:
+					arr_index_for_delete_everyday = []
+					for i in range(len(info_data_Weekly_window)):
+						if int(info_data_Weekly_window[i][1]) == 0:
+							if info_data_Weekly_window[i][6] == data_delete[6]:
+								arr_index_for_delete_everyday.append(info_data_Weekly_window[i])
+					for i in arr_index_for_delete_everyday:
+						info_data_Weekly_window.remove(i)
+				else:
+					info_data_Weekly_window.remove(data_delete)
+				write_data()
+				window_compl_del.grab_release() 
+				window_compl_del.destroy()
+				main_window.destroy()
 
 		window_compl_del = Toplevel()
 		window_compl_del.title('Подтвердите действие')
@@ -708,36 +745,68 @@ def weekly_window():
 
 	Label(frame_bottom, text="", bg= color_black).place(x=0, y=0, height=150, width= 1920)
 
+	def bottom_button_get_state():
+		if flag_for_last_day:
+			return 'disabled'
+		else:
+			return 'normal'
+		
 	def go_to_main_window():
 		Settings.flag_for_windows = 1
 		main_window.destroy()
 		
 	def on_enter_for_Button_to_Main(e):
-		Button_to_Main.config(background= color_light_gray, foreground= color_black)
+		if flag_for_last_day:
+			pass
+		else:
+			Button_to_Main.config(background= color_light_gray, foreground= color_black)
 	def on_leave_for_Button_to_Main(e):
 		Button_to_Main.config(background= color_grey, foreground= color_black)
-	Button_to_Main = Button(frame_bottom, text='Главная', font=("Arial", 16), bg= color_grey, command= go_to_main_window)
-	Button_to_Main.place(x=60, y=25, height= 100, width= 250)
+	Button_to_Main = Button(frame_bottom, text='Главная', state= bottom_button_get_state(), font=("Arial", 16), bg= color_grey, command= go_to_main_window)
+	Button_to_Main.place(x=55, y= 25, height= 100, width= 235)
 	Button_to_Main.bind('<Enter>', on_enter_for_Button_to_Main)
 	Button_to_Main.bind('<Leave>', on_leave_for_Button_to_Main)
 
 	def on_enter_for_Button_Add(e):
-		Button_Add.config(background= color_light_gray, foreground= color_black)
+		if flag_for_last_day:
+			pass
+		else:
+			Button_Add.config(background= color_light_gray, foreground= color_black)
 	def on_leave_for_Button_Add(e):
 		Button_Add.config(background= color_grey, foreground= color_black)
-	Button_Add = Button(frame_bottom, text='Добавить задачу', font=("Arial", 16), bg= color_grey, command= window_add_task)
-	Button_Add.place(x=370, y=25, height= 100, width= 250)
+	Button_Add = Button(frame_bottom, text='Добавить задачу', state= bottom_button_get_state(), font=("Arial", 16), bg= color_grey, command= window_add_task)
+	Button_Add.place(x=317, y= 25, height= 100, width= 235)
 	Button_Add.bind('<Enter>', on_enter_for_Button_Add)
 	Button_Add.bind('<Leave>', on_leave_for_Button_Add)
 
 	def on_enter_for_Button_Add_everyday(e):
-		Button_Add_everyday.config(background= color_light_gray, foreground= color_black)
+		if flag_for_last_day:
+			pass
+		else:
+			Button_Add_everyday.config(background= color_light_gray, foreground= color_black)
 	def on_leave_for_Button_Add_everyday(e):
 		Button_Add_everyday.config(background= color_grey, foreground= color_black)
-	Button_Add_everyday = Button(frame_bottom, text='Добавить ежедневку', font=("Arial", 16), bg= color_grey, command= window_add_task_everyday)
-	Button_Add_everyday.place(x=680, y=25, height= 100, width= 250)
+	Button_Add_everyday = Button(frame_bottom, text='Добавить ежедневку', state= bottom_button_get_state(), font=("Arial", 16), bg= color_grey, command= window_add_task_everyday)
+	Button_Add_everyday.place(x=579, y= 25, height= 100, width= 235)
 	Button_Add_everyday.bind('<Enter>', on_enter_for_Button_Add_everyday)
 	Button_Add_everyday.bind('<Leave>', on_leave_for_Button_Add_everyday)
+
+	def get_text_for_last_day():
+		global flag_for_last_day
+
+		if flag_for_last_day:
+			return ["Обычный режим", "Arial 18 bold"]
+		else:
+			return ["Изменить\nпрошлый день", ("Arial", 16)]
+
+	def on_enter_for_Button_Update_last_day(e):
+		Button_Update_last_day.config(background= color_light_gray, foreground= color_black)
+	def on_leave_for_Button_Update_last_day(e):
+		Button_Update_last_day.config(background= color_grey, foreground= color_black)
+	Button_Update_last_day = Button(frame_bottom, text= get_text_for_last_day()[0], font= get_text_for_last_day()[1], bg= color_grey, fg= color_black, command= lambda: update_last_day(main_window))
+	Button_Update_last_day.place(x=841, y=25, height=100, width= 235)
+	Button_Update_last_day.bind('<Enter>', on_enter_for_Button_Update_last_day)
+	Button_Update_last_day.bind('<Leave>', on_leave_for_Button_Update_last_day)
 		
 	def go_to_window_week_1():
 		if Settings.flag_for_windows == 2:
@@ -748,11 +817,14 @@ def weekly_window():
 			main_window.destroy()
 
 	def on_enter_for_Button_week_1(e):
-		Button_week_1.config(background= color_light_gray, foreground= color_black)
+		if flag_for_last_day:
+			pass
+		else:
+			Button_week_1.config(background= color_light_gray, foreground= color_black)
 	def on_leave_for_Button_week_1(e):
 		Button_week_1.config(background= color_grey, foreground= color_black)
-	Button_week_1 = Button(frame_bottom, text='1 неделя', font=("Arial", 16), bg= color_grey, command= go_to_window_week_1)
-	Button_week_1.place(x=990, y=25, height= 100, width= 250)
+	Button_week_1 = Button(frame_bottom, text='1 неделя', font=("Arial", 16), state= bottom_button_get_state(), bg= color_grey, command= go_to_window_week_1)
+	Button_week_1.place(x=1103, y= 25, height= 100, width= 235)
 	Button_week_1.bind('<Enter>', on_enter_for_Button_week_1)
 	Button_week_1.bind('<Leave>', on_leave_for_Button_week_1)
 
@@ -765,11 +837,14 @@ def weekly_window():
 			main_window.destroy()
 		
 	def on_enter_for_Button_week_2(e):
-		Button_week_2.config(background= color_light_gray, foreground= color_black)
+		if flag_for_last_day:
+			pass
+		else:
+			Button_week_2.config(background= color_light_gray, foreground= color_black)
 	def on_leave_for_Button_week_2(e):
 		Button_week_2.config(background= color_grey, foreground= color_black)
-	Button_week_2 = Button(frame_bottom, text='2 неделя', font=("Arial", 16), bg= color_grey, command= go_to_window_week_2)
-	Button_week_2.place(x=1300, y=25, height=100, width= 250)
+	Button_week_2 = Button(frame_bottom, text='2 неделя', font=("Arial", 16), state= bottom_button_get_state(), bg= color_grey, command= go_to_window_week_2)
+	Button_week_2.place(x=1365, y= 25, height= 100, width= 235)
 	Button_week_2.bind('<Enter>', on_enter_for_Button_week_2)
 	Button_week_2.bind('<Leave>', on_leave_for_Button_week_2)
 
@@ -778,7 +853,7 @@ def weekly_window():
 	def on_leave_for_Button_close(e):
 		Button_close.config(background= color_grey, foreground= color_black)
 	Button_close = Button(frame_bottom, text='Закрыть', font=("Arial", 16), bg= color_grey, command= Exit_from)
-	Button_close.place(x=1610, y=25, height=100, width= 250)
+	Button_close.place(x=1627, y= 25, height= 100, width= 235)
 	Button_close.bind('<Enter>', on_enter_for_Button_close)
 	Button_close.bind('<Leave>', on_leave_for_Button_close)
 
