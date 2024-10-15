@@ -3,6 +3,7 @@ import time
 import Settings
 from Weekly_window import get_weekly_tasks_count
 from functools import partial
+import random
 
 bad_1, good_1, bad_2, good_2, bad_3, good_3, bad_4, good_4, bad_5, good_5 = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 info_data_Main_window = []
@@ -206,7 +207,21 @@ def main_window():
 
         window_update.grab_set()
 
-    def sure_choice(params, color_meaning):
+    def get_text_for_motivation():
+        arr_phrases = ["Я это сделал ради Тебя ♡", 
+                       "Есть голод, который лучше терпеть, чем утолять.\nЕсли ты не поддаёшься искушению в малом,\nэто помогает отказываться от большего.",
+                       "Жизнь — это не ожидание, что гроза закончится...\nэто учиться танцевать под дождем.",
+                       "Главное начать, если начал - закончи.",
+                       "Чем выше мы взлетаем, тем меньше мы видим тех,\nкто не может летать.",
+                       "Вы никогда не пересечете океан,\nесли не наберетесь мужества потерять берег из виду.",
+                       "Либо вы управляете вашим днем,\nлибо день управляет вами.",
+                       "Есть только один способ избежать критики:\nничего не делай, ничего не говори и будь никем.",
+                       "Упади семь раз и восемь раз поднимись.",
+                       "Если нет ветра, берись за вёсла.",
+                       "Не столь важно, как медленно ты идешь, как то,\nкак долго ты идешь, не останавливаясь."]
+        return arr_phrases[random.randint(0, len(arr_phrases) - 1)]
+
+    def sure_choice(params, color_meaning, num_row):
         
             def sure(params):
                 
@@ -224,41 +239,48 @@ def main_window():
             
             def func():
                 pass
+            
+            flag = True
+            if int(info_data_Main_window[-1][3]) == time.localtime()[7]:
+                if color_meaning == "bad" and int(info_data_Main_window[-1][num_row + 4]) == -1 or color_meaning == "good" and int(info_data_Main_window[-1][num_row + 4]) == 1 or color_meaning == "good" and int(info_data_Main_window[-1][num_row + 4]) == -1:
+                    flag = False
+            if flag:
+                window_sure_choice = Toplevel()
+                window_sure_choice.title('Подтвердите действие')
+                window_sure_choice.geometry("477x335+724+357")
+                window_sure_choice.protocol('WM_DELETE_WINDOW', func)
+                frame = Frame(window_sure_choice, highlightbackground= "#000000", highlightthickness= 10, height= 50)
+                frame.pack(fill=BOTH, expand=1)
 
-            window_sure_choice = Toplevel()
-            window_sure_choice.title('Подтвердите действие')
-            window_sure_choice.geometry("477x335+724+357")
-            window_sure_choice.protocol('WM_DELETE_WINDOW', func)
-            frame = Frame(window_sure_choice, highlightbackground= "#000000", highlightthickness= 10, height= 50)
-            frame.pack(fill=BOTH, expand=1)
+                Label(frame, text="Подтвердите выбор", font="Arial 18 bold", height= 7).grid(row= 0, column= 0, columnspan= 4)
+                Label(frame, text="").grid(row= 1, column= 0)
 
-            Label(frame, text="Подтвердите выбор", font="Arial 18 bold", height= 7).grid(row= 0, column= 0, columnspan= 4)
-            Label(frame, text="").grid(row= 1, column= 0)
+                def on_enter_for_Button_Cancel(e):
+                    Button_Cancel.config(background= color_light_gray, foreground= color_black)
+                def on_leave_for_Button_Cancel(e):
+                    Button_Cancel.config(background= color_grey, foreground= color_black)
+                Button_Cancel = Button(frame, text="Отменить", height= 3, width= 15, font=("Arial", 18), bg= color_grey, command= close)
+                Button_Cancel.grid(row= 1, column= 1)
+                Button_Cancel.bind('<Enter>', on_enter_for_Button_Cancel)
+                Button_Cancel.bind('<Leave>', on_leave_for_Button_Cancel)
 
-            def on_enter_for_Button_Cancel(e):
-                Button_Cancel.config(background= color_light_gray, foreground= color_black)
-            def on_leave_for_Button_Cancel(e):
-                Button_Cancel.config(background= color_grey, foreground= color_black)
-            Button_Cancel = Button(frame, text="Отменить", height= 3, width= 15, font=("Arial", 18), bg= color_grey, command= close)
-            Button_Cancel.grid(row= 1, column= 1)
-            Button_Cancel.bind('<Enter>', on_enter_for_Button_Cancel)
-            Button_Cancel.bind('<Leave>', on_leave_for_Button_Cancel)
+                Label(frame, text="").grid(row= 1, column= 2)
 
-            Label(frame, text="").grid(row= 1, column= 2)
+                def on_enter_for_Button_Sure(e):
+                    if color_meaning == "bad":
+                        Button_Sure.config(background= color_red, foreground= color_black)
+                    elif color_meaning == "good":
+                        Button_Sure.config(background= color_green, foreground= color_black)
+                def on_leave_for_Button_Sure(e):
+                    Button_Sure.config(background= color_grey, foreground= color_black)
+                Button_Sure = Button(frame, text="Подтвердить", height= 3, width= 15, font=("Arial", 18), bg= color_grey, command= lambda: sure(params))
+                Button_Sure.grid(row= 1, column= 3)
+                Button_Sure.bind('<Enter>', on_enter_for_Button_Sure)
+                Button_Sure.bind('<Leave>', on_leave_for_Button_Sure)
 
-            def on_enter_for_Button_Sure(e):
-                if color_meaning == "bad":
-                    Button_Sure.config(background= color_red, foreground= color_black)
-                elif color_meaning == "good":
-                    Button_Sure.config(background= color_green, foreground= color_black)
-            def on_leave_for_Button_Sure(e):
-                Button_Sure.config(background= color_grey, foreground= color_black)
-            Button_Sure = Button(frame, text="Подтвердить", height= 3, width= 15, font=("Arial", 18), bg= color_grey, command= lambda: sure(params))
-            Button_Sure.grid(row= 1, column= 3)
-            Button_Sure.bind('<Enter>', on_enter_for_Button_Sure)
-            Button_Sure.bind('<Leave>', on_leave_for_Button_Sure)
-
-            window_sure_choice.grab_set()
+                window_sure_choice.grab_set()
+            else:
+                pass
 
     def Exit_from():
         quit()
@@ -350,6 +372,15 @@ def main_window():
         elif float(get_percent()[:-1]) >= 50: return color_green
         elif float(get_percent()[:-1]) >= 40: return color_yellow
         else: return color_red
+    
+    def get_bg_fg_enter(color_meaning, num_row):
+        if int(info_data_Main_window[-1][3]) == time.localtime()[7]:
+            if color_meaning == "good" and int(info_data_Main_window[-1][num_row + 4]) == -1:
+                return [color_grey, color_red]
+        if color_meaning == "bad":
+            return [color_red, color_black]
+        else:
+            return [color_green, color_black]
 
     def get_color_button(param= [-2, -2, -2, -2, -2], data = info_data_Main_window[-1]):
         a = 0
@@ -392,7 +423,7 @@ def main_window():
     def on_leave_for_Choice_left1(e):
         if int(info_data_Main_window[-1][4]) != -1:
             Choice_left1.config(background= color_grey, foreground= color_red)
-    Choice_left1 = Button(frame, text='Алкоголь', fg=get_color_button([-1, -2, -2, -2, -2])[1], bg=get_color_button([-1, -2, -2, -2, -2])[0], font=("Arial", 14), activebackground='red', command= lambda: sure_choice([-1, -2, -2, -2, -2], "bad"))
+    Choice_left1 = Button(frame, text='Алкоголь', fg=get_color_button([-1, -2, -2, -2, -2])[1], bg=get_color_button([-1, -2, -2, -2, -2])[0], font=("Arial", 14), activebackground= get_bg_fg_enter("bad", 0)[0], activeforeground= get_bg_fg_enter("bad", 0)[1], command= lambda: sure_choice([-1, -2, -2, -2, -2], "bad", 0))
     Choice_left1.grid(row=2, column=0, ipadx= 116, ipady= 20, pady= 5)
     Choice_left1.bind('<Enter>', on_enter_for_Choice_left1)
     Choice_left1.bind('<Leave>', on_leave_for_Choice_left1)
@@ -408,7 +439,7 @@ def main_window():
     def on_leave_for_Choice_right1(e):
         if int(info_data_Main_window[-1][4]) != 1:
             Choice_right1.config(background= color_grey, foreground= color_green)
-    Choice_right1 = Button(frame, text='Тренировка', fg=get_color_button([1, -2, -2, -2, -2])[1], bg=get_color_button([1, -2, -2, -2, -2])[0], font=("Arial", 14), activebackground='green', command= lambda: sure_choice([1, -2, -2, -2, -2], "good"))
+    Choice_right1 = Button(frame, text='Тренировка', fg=get_color_button([1, -2, -2, -2, -2])[1], bg=get_color_button([1, -2, -2, -2, -2])[0], font=("Arial", 14), activebackground= get_bg_fg_enter("good", 0)[0], activeforeground= get_bg_fg_enter("good", 0)[1], command= lambda: sure_choice([1, -2, -2, -2, -2], "good", 0))
     Choice_right1.grid(row=2, column=2, ipadx= 86, ipady= 20, pady= 5)
     Choice_right1.bind('<Enter>', on_enter_for_Choice_right1)
     Choice_right1.bind('<Leave>', on_leave_for_Choice_right1)
@@ -419,7 +450,7 @@ def main_window():
     def on_leave_for_Choice_left2(e):
         if int(info_data_Main_window[-1][5]) != -1:
             Choice_left2.config(background= color_grey, foreground= color_red)
-    Choice_left2 = Button(frame, text='Никотин', fg=get_color_button([-2, -1, -2, -2, -2])[1], bg=get_color_button([-2, -1, -2, -2, -2])[0], font=("Arial", 14), activebackground='red', command= lambda: sure_choice([-2, -1, -2, -2, -2], "bad"))
+    Choice_left2 = Button(frame, text='Никотин', fg=get_color_button([-2, -1, -2, -2, -2])[1], bg=get_color_button([-2, -1, -2, -2, -2])[0], font=("Arial", 14), activebackground= get_bg_fg_enter("bad", 1)[0], activeforeground= get_bg_fg_enter("bad", 1)[1], command= lambda: sure_choice([-2, -1, -2, -2, -2], "bad", 1))
     Choice_left2.grid(row=3, column=0, ipadx= 122, ipady= 20, pady= 5)
     Choice_left2.bind('<Enter>', on_enter_for_Choice_left2)
     Choice_left2.bind('<Leave>', on_leave_for_Choice_left2)
@@ -435,7 +466,7 @@ def main_window():
     def on_leave_for_Choice_right2(e):
         if int(info_data_Main_window[-1][5]) != 1:
             Choice_right2.config(background= color_grey, foreground= color_green)
-    Choice_right2 = Button(frame, text='Активность', fg=get_color_button([-2, 1, -2, -2, -2])[1], bg=get_color_button([-2, 1, -2, -2, -2])[0], font=("Arial", 14), activebackground='green', command= lambda: sure_choice([-2, 1, -2, -2, -2], "good"))
+    Choice_right2 = Button(frame, text='Активность', fg=get_color_button([-2, 1, -2, -2, -2])[1], bg=get_color_button([-2, 1, -2, -2, -2])[0], font=("Arial", 14), activebackground= get_bg_fg_enter("good", 1)[0], activeforeground= get_bg_fg_enter("good", 1)[1], command= lambda: sure_choice([-2, 1, -2, -2, -2], "good", 1))
     Choice_right2.grid(row=3, column=2, ipadx= 88, ipady= 20, pady= 5)
     Choice_right2.bind('<Enter>', on_enter_for_Choice_right2)
     Choice_right2.bind('<Leave>', on_leave_for_Choice_right2)
@@ -446,7 +477,7 @@ def main_window():
     def on_leave_for_Choice_left3(e):
         if int(info_data_Main_window[-1][6]) != -1:
             Choice_left3.config(background= color_grey, foreground= color_red)
-    Choice_left3 = Button(frame, text='Игры', font=("Arial", 14), fg=get_color_button([-2, -2, -1, -2, -2])[1], bg=get_color_button([-2, -2, -1, -2, -2])[0], activebackground='red', command= lambda: sure_choice([-2, -2, -1, -2, -2], "bad"))
+    Choice_left3 = Button(frame, text='Игры', font=("Arial", 14), fg=get_color_button([-2, -2, -1, -2, -2])[1], bg=get_color_button([-2, -2, -1, -2, -2])[0], activebackground= get_bg_fg_enter("bad", 2)[0], activeforeground= get_bg_fg_enter("bad", 2)[1], command= lambda: sure_choice([-2, -2, -1, -2, -2], "bad", 2))
     Choice_left3.grid(row=4, column=0, ipadx= 134, ipady= 20, pady= 5)
     Choice_left3.bind('<Enter>', on_enter_for_Choice_left3)
     Choice_left3.bind('<Leave>', on_leave_for_Choice_left3)
@@ -462,7 +493,7 @@ def main_window():
     def on_leave_for_Choice_right3(e):
         if int(info_data_Main_window[-1][6]) != 1:
             Choice_right3.config(background= color_grey, foreground= color_green)
-    Choice_right3 = Button(frame, text='Учёба',font=("Arial", 14), fg=get_color_button([-2, -2, 1, -2, -2])[1], bg=get_color_button([-2, -2, 1, -2, -2])[0], activebackground='green', command= lambda: sure_choice([-2, -2, 1, -2, -2], "good"))
+    Choice_right3 = Button(frame, text='Учёба',font=("Arial", 14), fg=get_color_button([-2, -2, 1, -2, -2])[1], bg=get_color_button([-2, -2, 1, -2, -2])[0], activebackground= get_bg_fg_enter("good", 2)[0], activeforeground= get_bg_fg_enter("good", 2)[1], command= lambda: sure_choice([-2, -2, 1, -2, -2], "good", 2))
     Choice_right3.grid(row=4, column=2, ipadx= 111, ipady= 20, pady= 5)
     Choice_right3.bind('<Enter>', on_enter_for_Choice_right3)
     Choice_right3.bind('<Leave>', on_leave_for_Choice_right3)
@@ -473,7 +504,7 @@ def main_window():
     def on_leave_for_Choice_left4(e):
         if int(info_data_Main_window[-1][7]) != -1:
             Choice_left4.config(background= color_grey, foreground= color_red)
-    Choice_left4 = Button(frame, text='Потребительский контент', font=("Arial", 14), fg=get_color_button([-2, -2, -2, -1, -2])[1], bg=get_color_button([-2, -2, -2, -1, -2])[0], activebackground='red', command= lambda: sure_choice([-2, -2, -2, -1, -2], "bad"))
+    Choice_left4 = Button(frame, text='Потребительский контент', font=("Arial", 14), fg=get_color_button([-2, -2, -2, -1, -2])[1], bg=get_color_button([-2, -2, -2, -1, -2])[0], activebackground= get_bg_fg_enter("bad", 3)[0], activeforeground= get_bg_fg_enter("bad", 3)[1], command= lambda: sure_choice([-2, -2, -2, -1, -2], "bad", 3))
     Choice_left4.grid(row=5, column=0, ipadx= 45, ipady= 20, pady= 5)
     Choice_left4.bind('<Enter>', on_enter_for_Choice_left4)
     Choice_left4.bind('<Leave>', on_leave_for_Choice_left4)
@@ -489,7 +520,7 @@ def main_window():
     def on_leave_for_Choice_right4(e):
         if int(info_data_Main_window[-1][7]) != 1:
             Choice_right4.config(background= color_grey, foreground= color_green)
-    Choice_right4 = Button(frame, text='Познавательный контент',font=("Arial", 14), fg=get_color_button([-2, -2, -2, 1, -2])[1], bg=get_color_button([-2, -2, -2, 1, -2])[0], activebackground='green', command= lambda: sure_choice([-2, -2, -2, 1, -2], "good"))
+    Choice_right4 = Button(frame, text='Познавательный контент',font=("Arial", 14), fg=get_color_button([-2, -2, -2, 1, -2])[1], bg=get_color_button([-2, -2, -2, 1, -2])[0], activebackground= get_bg_fg_enter("good", 3)[0], activeforeground= get_bg_fg_enter("good", 3)[1], command= lambda: sure_choice([-2, -2, -2, 1, -2], "good", 3))
     Choice_right4.grid(row=5, column=2, ipadx= 29, ipady= 20, pady= 5)
     Choice_right4.bind('<Enter>', on_enter_for_Choice_right4)
     Choice_right4.bind('<Leave>', on_leave_for_Choice_right4)
@@ -500,7 +531,7 @@ def main_window():
     def on_leave_for_Choice_left5(e):
         if int(info_data_Main_window[-1][8]) != -1:
             Choice_left5.config(background= color_grey, foreground= color_red)
-    Choice_left5 = Button(frame, text='Неправильное питание', font=("Arial", 14), fg=get_color_button([-2, -2, -2, -2, -1])[1], bg=get_color_button([-2, -2, -2, -2, -1])[0], activebackground='red', command= lambda: sure_choice([-2, -2, -2, -2, -1], "bad"))
+    Choice_left5 = Button(frame, text='Неправильное питание', font=("Arial", 14), fg=get_color_button([-2, -2, -2, -2, -1])[1], bg=get_color_button([-2, -2, -2, -2, -1])[0], activebackground= get_bg_fg_enter("bad", 4)[0], activeforeground= get_bg_fg_enter("bad", 4)[1], command= lambda: sure_choice([-2, -2, -2, -2, -1], "bad", 4))
     Choice_left5.grid(row=6, column=0, ipadx= 57, ipady= 20, pady= 5)
     Choice_left5.bind('<Enter>', on_enter_for_Choice_left5)
     Choice_left5.bind('<Leave>', on_leave_for_Choice_left5)
@@ -516,7 +547,7 @@ def main_window():
     def on_leave_for_Choice_right5(e):
         if int(info_data_Main_window[-1][8]) != 1:
             Choice_right5.config(background= color_grey, foreground= color_green)
-    Choice_right5 = Button(frame, text='Правильное питание', font=("Arial", 14), fg=get_color_button([-2, -2, -2, -2, 1])[1], bg=get_color_button([-2, -2, -2, -2, 1])[0], activebackground='green', command= lambda: sure_choice([-2, -2, -2, -2, 1], "good"))
+    Choice_right5 = Button(frame, text='Правильное питание', font=("Arial", 14), fg=get_color_button([-2, -2, -2, -2, 1])[1], bg=get_color_button([-2, -2, -2, -2, 1])[0], activebackground= get_bg_fg_enter("good", 4)[0], activeforeground= get_bg_fg_enter("good", 4)[1], command= lambda: sure_choice([-2, -2, -2, -2, 1], "good", 4))
     Choice_right5.grid(row=6, column=2, ipadx= 48, ipady= 20, pady= 5)
     Choice_right5.bind('<Enter>', on_enter_for_Choice_right5)
     Choice_right5.bind('<Leave>', on_leave_for_Choice_right5)
@@ -554,7 +585,7 @@ def main_window():
 
     label_space = Label(frame, text="")
     label_space.grid(row=8, column=0, columnspan=3, ipadx= 100)
-    label_for_you = Label(frame, text="Я это сделал ради Тебя ♡", font=("Comic Sans MS", 28), foreground=color_violet)
-    label_for_you.grid(row=9, column=0, columnspan=3, ipadx= 100)
+    label_for_you = Label(frame, text= get_text_for_motivation(), font=("Comic Sans MS", 28), foreground=color_violet)
+    label_for_you.grid(row=9, column=0, columnspan=3)
 
     mainloop()
