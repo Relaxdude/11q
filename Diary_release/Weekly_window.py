@@ -147,7 +147,8 @@ def state_or_normal(status_task):
 	global flag_for_last_day
 
 	if flag_for_last_day:
-		if int(status_task[5]) == -1 or int(status_task[5]) == 2 and (time.localtime()[6] != 0 and Settings.flag_for_windows == 2 and time.localtime()[7] - int(status_task[0]) == 1):
+		if (int(status_task[5]) == -1 or int(status_task[5]) == 2) and (time.localtime()[6] != 0 and Settings.flag_for_windows == 2 and time.localtime()[7] - int(status_task[0]) == 1):
+			print(time.localtime()[7] - int(status_task[0]))
 			return 'normal'
 		else:
 			return 'disabled'
@@ -875,5 +876,5 @@ def weekly_window():
 	my_canvas.bind('<Configure>', lambda e: my_canvas.configure(scrollregion = my_canvas.bbox("all")))
 	my_canvas.bind_all("<MouseWheel>", _on_mousewheel)
 
-	Label(main_window, text= "beta\n1.13", background= color_background, font=("Arial", 10)).place(x= 1870, y= 5)
+	Label(main_window, text= "beta\n1.14", background= color_background, font=("Arial", 10)).place(x= 1870, y= 5)
 	main_window.mainloop()
