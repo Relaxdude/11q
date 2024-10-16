@@ -588,5 +588,5 @@ def main_window():
     label_for_you = Label(frame, text= get_text_for_motivation(), font=("Comic Sans MS", 28), foreground=color_violet)
     label_for_you.grid(row=9, column=0, columnspan=3)
 
-    Label(window, text= "beta\n1.13", font=("Arial", 10)).place(x= 1870, y= 5)
+    Label(window, text= "beta\n1.14", font=("Arial", 10)).place(x= 1870, y= 5)
     mainloop()
