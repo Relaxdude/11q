@@ -103,9 +103,9 @@ def get_color_tasks(data_string):
 		return "#269617"
 	elif int(data_string[5]) == 0 or (int(data_string[5]) == 2 and time.localtime()[7] <= int(data_string[0])):
 		return "#e06f24"
-	elif int(data_string[5]) == -1 or (int(data_string[5]) == 2 and time.localtime()[7] > int(data_string[0])):
+	elif int(data_string[5]) == -1:
 		return color_grey
-	elif int(data_string[5]) == -2:
+	elif int(data_string[5]) == -2 or (int(data_string[5]) == 2 and time.localtime()[7] > int(data_string[0])):
 		return "#b32727"
 
 def which_week_day(day):
@@ -876,5 +876,5 @@ def weekly_window():
 	my_canvas.bind('<Configure>', lambda e: my_canvas.configure(scrollregion = my_canvas.bbox("all")))
 	my_canvas.bind_all("<MouseWheel>", _on_mousewheel)
 
-	Label(main_window, text= "beta\n1.14", background= color_background, font=("Arial", 10)).place(x= 1870, y= 5)
+	Label(main_window, text= "beta\n1.15", background= color_background, font=("Arial", 10)).place(x= 1870, y= 5)
 	main_window.mainloop()
